@@ -253,6 +253,24 @@
         {
             recordLbl.text = @"Storing...";
             //Creating its Asset.
+            AVURLAsset* audioAsset = [[AVURLAsset alloc]initWithURL:[NSURL fileURLWithPath:strURL] options:nil];
+            AVAssetExportSession *exportSession = [AVAssetExportSession exportSessionWithAsset:audioAsset presetName:AVAssetExportPresetAppleM4A];
+            
+            Float64 startTimeInSeconds = 0;
+            Float64 durationInSeconds = audioPlayer.duration;
+            
+            CMTime start = CMTimeMakeWithSeconds(startTimeInSeconds, 600);
+            CMTime duration1 = CMTimeMakeWithSeconds(durationInSeconds, 600);
+            
+            //Storing the saved file with a different name Saved
+            NSString *strURLT = [NSString stringWithFormat:@"%@/Saved_%@.m4a", DOCUMENTS_FOLDER, dateString] ;
+            exportSession.outputURL = [NSURL fileURLWithPath:strURLT];
+            
+            exportSession.outputFileType=AVFileTypeAppleM4A;
+            exportSession.timeRange = CMTimeRangeMake(start, duration1);
+            
+            //Starting the recording again.
+            [self performSelector:@selector(fnStartRecordingAgain) withObject:nil afterDelay:3.0];
             
             [exportSession exportAsynchronouslyWithCompletionHandler:^{
                 [actView stopAnimating];
@@ -277,7 +295,26 @@
                         {
                             if(arrFiles.count > 0)
                             {
-                                
+                                for(int i = 0; i<arrFiles.count;i++)
+                                {
+                                    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"SELF IN %@", arrFiles];
+                                    BOOL result = [predicate evaluateWithObject:dateString];
+                                    
+                                    if(result == FALSE){
+                                        [arrFiles addObject:dateString];
+                                        
+                                        NSDate *currentTime = [NSDate date];
+                                        NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
+                                        [dateFormatter setDateFormat:@"dd/MM/yyyy, hh:mm:ss a"];// here set format which you want...
+                                        NSString *date = [dateFormatter stringFromDate:currentTime];
+                                        
+                                        [dateArray addObject:date];
+                                        [playingStateArray addObject:@"No"];
+                                        
+                                        NSString *timeline = [NSString stringWithFormat:@"0%d", (int)audioPlayer.duration];
+                                        [timeArray addObject:timeline];
+                                    }
+                                }
                             }
                             else{
                                 [arrFiles addObject:dateString];
@@ -326,7 +363,16 @@
             Float64 durationInSeconds = 10;
             
             //Reducing the duration by 10 seconds
-                       
+            CMTime start = CMTimeMakeWithSeconds(startTimeInSeconds, 600);
+            CMTime duration1 = CMTimeMakeWithSeconds(durationInSeconds, 600);
+            
+            //Storing the saved file with a different name Saved
+            NSString *strURLT = [NSString stringWithFormat:@"%@/Saved_%@.m4a", DOCUMENTS_FOLDER, dateString] ;
+            exportSession.outputURL = [NSURL fileURLWithPath:strURLT];
+            
+            exportSession.outputFileType=AVFileTypeAppleM4A;
+            exportSession.timeRange = CMTimeRangeMake(start, duration1);
+            
             //Starting the recording again.
             [self performSelector:@selector(fnStartRecordingAgain) withObject:nil afterDelay:3.0];
             
